@@ -44,8 +44,8 @@ func StartServer() (err error) {
 	router := routing.New()
 	setRoutes(router)
 	database.InitDb()
-	log.Println("Server listening at localhost:5002")
-	if err := fasthttp.ListenAndServe(":5002", router.HandleRequest); err != nil {
+	log.Println("Server listening at localhost:5000")
+	if err := fasthttp.ListenAndServe(":5000", router.HandleRequest); err != nil {
 		log.Println(err)
 	}
 	return err

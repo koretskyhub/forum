@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,9 +14,9 @@ var DBConnPool *pgx.ConnPool
 func InitDb() (err error) {
 	config := pgx.ConnConfig{
 		Host:     "localhost",
-		Database: "forum",
-		User:     "forum",
-		Password: "forum",
+		Database: "docker",
+		User:     "docker",
+		Password: "docker",
 	}
 
 	poolConfig := pgx.ConnPoolConfig{
@@ -35,7 +36,7 @@ func InitDb() (err error) {
 		os.Exit(1)
 	}
 
-	bFile, err := ioutil.ReadFile("/home/mike/techpark/golang/gopath/src/forum/database/scripts/table_creater.sql")
+	bFile, err := ioutil.ReadFile(fmt.Sprintf("%s/src/forum/database/table_creater.sql", os.Getenv("GOPATH")))
 	if err != nil {
 		log.Println(os.Stderr, "Unable to read sql script:", err)
 		os.Exit(1)
