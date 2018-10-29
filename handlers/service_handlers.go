@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"forum/models"
-	"log"
 	"net/http"
 
 	"github.com/mailru/easyjson"
@@ -10,7 +9,7 @@ import (
 )
 
 func ClearDbHandler(ctx *routing.Context) (er error) {
-	log.Println("clearDbHandler")
+	// log.Println("clearDbHandler")
 	status := models.Status{}
 	err := status.ResetData()
 	switch err.Message {
@@ -23,7 +22,7 @@ func ClearDbHandler(ctx *routing.Context) (er error) {
 }
 
 func GetDbInfoHandler(ctx *routing.Context) (er error) {
-	log.Println("getDbInfoHandler")
+	// log.Println("getDbInfoHandler")
 	status := models.Status{}
 	err := status.GetStatus()
 	switch err.Message {

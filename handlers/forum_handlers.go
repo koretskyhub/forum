@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"forum/models"
-	"log"
 	"net/http"
 
 	"github.com/mailru/easyjson"
@@ -10,7 +9,7 @@ import (
 )
 
 func CreateForumHandler(ctx *routing.Context) (er error) {
-	log.Println("createForumHandler")
+	// log.Println("createForumHandler")
 	forum := models.Forum{}
 	if jsonEr := easyjson.Unmarshal(ctx.PostBody(), &forum); jsonEr != nil {
 		return jsonEr
@@ -37,13 +36,13 @@ func CreateForumHandler(ctx *routing.Context) (er error) {
 }
 
 func GetForumHandler(ctx *routing.Context) (er error) {
-	log.Println("getForumHandler")
-	
+	// log.Println("getForumHandler")
+
 	forum := models.Forum{}
 	forum.Slug = ctx.Param("slug")
 
 	err := forum.GetDetails()
-	
+
 	switch err.Message {
 	case models.NotFound:
 		ctx.SetStatusCode(http.StatusNotFound)

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"forum/models"
-	"log"
 	"net/http"
 
 	"github.com/mailru/easyjson"
@@ -10,7 +9,7 @@ import (
 )
 
 func CreateUserHandler(ctx *routing.Context) (er error) {
-	log.Println("createUserHandler")
+	// log.Println("createUserHandler")
 	user := models.User{}
 	if jsonEr := easyjson.Unmarshal(ctx.PostBody(), &user); jsonEr != nil {
 		return jsonEr
@@ -32,7 +31,7 @@ func CreateUserHandler(ctx *routing.Context) (er error) {
 }
 
 func GetProfileHandler(ctx *routing.Context) (er error) {
-	log.Println("getProfileHandler")
+	// log.Println("getProfileHandler")
 	user := models.User{}
 	user.Nickname = ctx.Param("nickname")
 	err := user.GetProfile()
@@ -52,7 +51,7 @@ func GetProfileHandler(ctx *routing.Context) (er error) {
 }
 
 func UpdateProfileHandler(ctx *routing.Context) (er error) {
-	log.Println("updateProfileHandler")
+	// log.Println("updateProfileHandler")
 	user := models.User{}
 	if jsonEr := easyjson.Unmarshal(ctx.PostBody(), &user); jsonEr != nil {
 		return jsonEr
@@ -82,7 +81,7 @@ func UpdateProfileHandler(ctx *routing.Context) (er error) {
 }
 
 func GetForumUsersHandler(ctx *routing.Context) (er error) {
-	log.Println("getForumUsersHandler")
+	// log.Println("getForumUsersHandler")
 
 	limit, since, desc := ParseQueryParams(ctx)
 

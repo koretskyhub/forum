@@ -57,8 +57,8 @@ WORKDIR $GOPATH/src/forum
 RUN go get -u github.com/mailru/easyjson/...
 
 # Собираем и устанавливаем пакет
-RUN go install ./...
 RUN easyjson ./models
+RUN go install ./...
 
 # Объявлем порт сервера
 EXPOSE 5000

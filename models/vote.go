@@ -57,35 +57,36 @@ func (vote *Vote) AddVoice(t *Thread) (err ModelError) {
 
 		if er != nil {
 			log.Println(er, tag.RowsAffected())
-		}
-
-		tx.Commit()
-
-		tx, er := database.DBConnPool.Begin()
-		if er != nil {
-			log.Println(os.Stderr, "Unable to create transaction:", er)
+			tx.Rollback()
+			return
 		}
 
 		er = tx.QueryRow(`
-			select 
-				"user"."nickname" as author,
-				thread.created as created,
-				"forum"."slug" as forum,
-				thread.id as id,
-				thread.message as message,
-				thread.slug as slug,
-				thread.title as title,
-				COALESCE(sum(CASE 
-					WHEN vote.voice THEN 1 
-					WHEN NOT vote.voice THEN -1
-					END ),0) as votes
-			from thread
-			join "user" on "user"."id" = thread.u_id
-			join "forum" on "forum"."id" = thread.f_id
-			left join vote on vote.t_id = thread.id
-			where thread.id = $1
-			group by thread.id, "user"."id", "forum"."id";`, t.Id).
+				select 
+					"user"."nickname" as author,
+					thread.created as created,
+					"forum"."slug" as forum,
+					thread.id as id,
+					thread.message as message,
+					coalesce(thread.slug, '') as slug,
+					thread.title as title,
+					COALESCE(sum(CASE 
+						WHEN vote.voice THEN 1 
+						WHEN NOT vote.voice THEN -1
+						END ),0) as votes
+				from thread
+				join "user" on "user"."id" = thread.u_id
+				join "forum" on "forum"."id" = thread.f_id
+				left join vote on vote.t_id = thread.id
+				where thread.id = $1
+				group by thread.id, "user"."id", "forum"."id";`, t.Id).
 			Scan(&t.Author, &t.Created, &t.Forum, &t.Id, &t.Message, &t.Slug, &t.Title, &t.Votes)
+
+		if er != nil {
+			log.Println(er)
+			tx.Rollback()
+			return
+		}
 	}
 
 	tx.Commit()

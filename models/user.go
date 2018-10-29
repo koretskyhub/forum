@@ -32,14 +32,14 @@ func (u *User) Create() (users *Users, err ModelError) {
 		OR nickname = $2;`,
 		u.Email,
 		u.Nickname); er != nil {
-		log.Println(er)
+		// log.Println(er)
 	} else {
 		if foundUser := rows.Next(); foundUser == true {
 			users = &Users{}
 			for foundUser {
 				user := User{}
 				if rows.Err() != nil {
-					log.Println(rows.Err())
+					// log.Println(rows.Err())
 				}
 				rows.Scan(&user.About, &user.Email, &user.Fullname, &user.Nickname)
 				*users = append(*users, &user)
@@ -53,7 +53,7 @@ func (u *User) Create() (users *Users, err ModelError) {
 			VALUES ($1, $2, $3, $4);`,
 				u.About, u.Email, u.Fullname, u.Nickname)
 			if er != nil {
-				log.Println(er)
+				// log.Println(er)
 			}
 		}
 	}
@@ -74,7 +74,7 @@ func (u *User) GetProfile() (err ModelError) {
 		u.Nickname).Scan(&u.About, &u.Email, &u.Fullname, &u.Nickname)
 
 	if er != nil {
-		log.Println(er)
+		// log.Println(er)
 		err = ModelError{Message: NotFound}
 	}
 
@@ -133,10 +133,10 @@ func (useres *Users) GetByForum(forum *Forum, limit int64, since string, desc bo
 
 	var fid int64
 
-	er =tx.QueryRow(`select id from forum where forum.slug = $1`, forum.Slug).
-	Scan(&fid)
+	er = tx.QueryRow(`select id from forum where forum.slug = $1`, forum.Slug).
+		Scan(&fid)
 	if er != nil {
-		log.Println(er)
+		// log.Println(er)
 		err = ModelError{Message: NotFound}
 		return err
 	}
@@ -179,7 +179,7 @@ func (useres *Users) GetByForum(forum *Forum, limit int64, since string, desc bo
 		limit $3;`, fid, since, limit)
 
 	if er != nil {
-		log.Println(er)
+		// log.Println(er)
 	} else {
 		for row.Next() {
 			u := User{}

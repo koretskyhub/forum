@@ -53,9 +53,7 @@ func (t *Thread) Create() (err ModelError) {
 			ON CONFLICT DO NOTHING
 			RETURNING id;`,
 			t.Slug, t.Created, t.Title, t.Message, uid, fid).Scan(&t.Id)
-		log.Println(t.Id)
 		if t.Id == 0 {
-			log.Println(os.Stderr, err)
 			err = ModelError{Message: Conflict}
 			er = tx.QueryRow(`
 			select 

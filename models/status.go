@@ -56,9 +56,5 @@ func (s *Status) GetStatus() (err ModelError) {
 		log.Println(er)
 	}
 
-	// defer tx.Rollback()
-
-	// tx.Commit()
-
 	return err
 }

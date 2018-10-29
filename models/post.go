@@ -252,15 +252,10 @@ func (posts *Posts) GetPostsByThread(t *Thread, sort string, limit int64, since 
 		join forum on forum.id = thread.f_id
 		order by sorted_posts.path[1] `+queryDesc+`, sorted_posts.path[2:] asc nulls first, sorted_posts.created `+queryDesc+`;`, sinceCond)
 	default:
-		log.Println("undefined sort")
 		return ModelError{}
 	}
 
-	// log.Println(query)
-
 	row, er := tx.Query(query, sinceInt64, t.Id, limit)
-
-	// log.Println(er)
 
 	for row.Next() {
 		p := Post{}
@@ -346,8 +341,6 @@ func (post *Post) Update() (err ModelError) {
 					else $1
 				end
 	WHERE id = $2;`,post.Message, post.Id)
-
-	log.Println(er)
 
 
 	if tag.RowsAffected() == 0 {

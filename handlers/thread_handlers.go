@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"forum/models"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func CreateThreadHandler(ctx *routing.Context) (er error) {
-	log.Println("createThreadHandler")
+	// log.Println("createThreadHandler")
 	thread := models.Thread{}
 	if jsonEr := easyjson.Unmarshal(ctx.PostBody(), &thread); jsonEr != nil {
 		return jsonEr
@@ -41,13 +40,13 @@ func CreateThreadHandler(ctx *routing.Context) (er error) {
 }
 
 func GetForumThreadsHandler(ctx *routing.Context) (er error) {
-	log.Println("getForumThreadsHandler")
+	// log.Println("getForumThreadsHandler")
 	limit, since, desc := ParseQueryParams(ctx)
 	forumSlug := ctx.Param("slug")
 	threads := models.Threads{}
 
 	err := threads.GetThreadsByForum(forumSlug, limit, since, desc)
-	
+
 	switch err.Message {
 	case models.NotFound:
 		ctx.SetStatusCode(http.StatusNotFound)
@@ -65,8 +64,8 @@ func GetForumThreadsHandler(ctx *routing.Context) (er error) {
 }
 
 func GetThreadHandler(ctx *routing.Context) (er error) {
-	log.Println("getThreadHandler")
-		
+	// log.Println("getThreadHandler")
+
 	thread := models.Thread{}
 
 	if id, er := strconv.Atoi(ctx.Param("slug_or_id")); er != nil {
@@ -93,7 +92,7 @@ func GetThreadHandler(ctx *routing.Context) (er error) {
 }
 
 func UpdateThreadHandler(ctx *routing.Context) (er error) {
-	log.Println("updateThreadHandler")
+	// log.Println("updateThreadHandler")
 	thread := models.Thread{}
 	if jsonEr := easyjson.Unmarshal(ctx.PostBody(), &thread); jsonEr != nil {
 		return jsonEr
@@ -106,7 +105,7 @@ func UpdateThreadHandler(ctx *routing.Context) (er error) {
 	}
 
 	err := thread.Update()
-	
+
 	switch err.Message {
 	case models.NotFound:
 		ctx.SetStatusCode(http.StatusNotFound)
@@ -123,8 +122,8 @@ func UpdateThreadHandler(ctx *routing.Context) (er error) {
 }
 
 func VoteThreadHandler(ctx *routing.Context) (er error) {
-	log.Println("voteThreadHandler")
-	
+	// log.Println("voteThreadHandler")
+
 	vote := models.Vote{}
 	thread := models.Thread{}
 

@@ -32,7 +32,6 @@ func (f *Forum) Create() (err ModelError) {
 		log.Println(os.Stderr, err)
 		err = ModelError{Message: NotFound}
 	} else {
-		log.Println(uid)
 		tag, er := tx.Exec(`
 			INSERT INTO "forum" (slug, title, u_id)
 			VALUES (
@@ -60,7 +59,7 @@ func (f *Forum) Create() (err ModelError) {
 		group by "forum"."id", "user"."id";`, f.Slug).
 			Scan(&f.Posts, &f.Slug, &f.Threads, &f.Title, &f.User)
 		if er != nil {
-			log.Println("cannot get forum details", er)
+			// log.Println("cannot get forum details", er)
 		}
 	}
 	defer tx.Rollback()
@@ -92,7 +91,7 @@ func (f *Forum) GetDetails() (err ModelError) {
 	group by "forum"."id", "user"."id";`, f.Slug).
 		Scan(&f.Posts, &f.Slug, &f.Threads, &f.Title, &f.User)
 	if er != nil {
-		log.Println("cannot get forum details", er)
+		// log.Println("cannot get forum details", er)
 		err = ModelError{Message: NotFound}
 	}
 

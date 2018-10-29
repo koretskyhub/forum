@@ -12,7 +12,7 @@ import (
 )
 
 func GetThreadPostsHandler(ctx *routing.Context) (er error) {
-	log.Println("getThreadPostsHandler")
+	// log.Println("getThreadPostsHandler")
 	limit, since, desc := ParseQueryParams(ctx)
 	sort := string(ctx.QueryArgs().Peek("sort"))
 
@@ -44,7 +44,7 @@ func GetThreadPostsHandler(ctx *routing.Context) (er error) {
 }
 
 func GetPostHandler(ctx *routing.Context) (er error) {
-	log.Println("getPostHandler")
+	// log.Println("getPostHandler")
 
 
 	//string[array]
@@ -89,7 +89,7 @@ func GetPostHandler(ctx *routing.Context) (er error) {
 }
 
 func UpdatePostHandler(ctx *routing.Context) (er error) {
-	log.Println("updatePostHandler")
+	// log.Println("updatePostHandler")
 
 	post := models.Post{}
 
@@ -121,7 +121,7 @@ func UpdatePostHandler(ctx *routing.Context) (er error) {
 }
 
 func CreatePostsHandler(ctx *routing.Context) (er error) {
-	log.Println("createPostHandler")
+	// log.Println("createPostHandler")
 	posts := models.Posts{}
 	thread := models.Thread{}
 	if jsonEr := easyjson.Unmarshal(ctx.PostBody(), &posts); jsonEr != nil {
