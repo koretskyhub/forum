@@ -54,11 +54,14 @@ ADD ./ $GOPATH/src/forum
 WORKDIR $GOPATH/src/forum
 
 # Собираем генераторы
-RUN go get -u github.com/mailru/easyjson/...
+RUN go get \
+    github.com/valyala/fasthttp \
+    github.com/qiangxue/fasthttp-routing \
+    github.com/jackc/pgx \
+    github.com/mailru/easyjson
 
 # Собираем и устанавливаем пакет
-RUN easyjson ./models
-RUN go install ./...
+RUN go install .
 
 # Объявлем порт сервера
 EXPOSE 5000
