@@ -1,6 +1,0 @@
-#exec
-tech-db-forum
-debug
-
-#codegen
-models/*_easyjson.go
