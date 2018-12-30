@@ -25,6 +25,7 @@ func InitDb() (err error) {
 	}
 
 	DBConnPool, err = pgx.NewConnPool(poolConfig)
+
 	if err != nil {
 		log.Println(os.Stderr, "Unable to create conn pool:", err)
 		os.Exit(1)
@@ -48,9 +49,8 @@ func InitDb() (err error) {
 		os.Exit(1)
 	}
 
-	defer tx.Rollback()
-
 	err = tx.Commit()
+
 	if err != nil {
 		log.Println(os.Stderr, "Unable to commit:", err)
 		os.Exit(1)

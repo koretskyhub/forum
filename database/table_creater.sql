@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "forum" (
 CREATE TABLE IF NOT EXISTS "thread" (
 	id 			bigserial NOT NULL PRIMARY KEY,
 	slug 		CITEXT UNIQUE,
-	created 	timestamp WITH TIME ZONE NOT NULL,
+	created 	timestamp (6) WITH TIME ZONE NOT NULL,
 	title 		text NOT NULL,
 	message 	text NOT NULL,
 	u_id 		bigserial NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS "thread" (
 
 CREATE TABLE IF NOT EXISTS "post" (
 	id 			bigserial NOT NULL PRIMARY KEY,
-	created 	timestamp WITH TIME ZONE NOT NULL,
+	created 	timestamp (6) WITH TIME ZONE NOT NULL,
 	is_edited 	bool NOT NULL DEFAULT FALSE,
 	message 	text NOT NULL,
 	path 		integer[] NOT NULL,

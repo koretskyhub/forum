@@ -45,6 +45,7 @@ func GetForumThreadsHandler(ctx *routing.Context) (er error) {
 	forumSlug := ctx.Param("slug")
 	threads := models.Threads{}
 
+	// log.Println(forumSlug, limit, since, desc)
 	err := threads.GetThreadsByForum(forumSlug, limit, since, desc)
 
 	switch err.Message {

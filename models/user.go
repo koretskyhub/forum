@@ -7,12 +7,9 @@ import (
 
 //easyjson:json
 type User struct {
-	About string `json:"about,omitempty"`
-
-	Email string `json:"email,omitempty"`
-
+	About    string `json:"about,omitempty"`
+	Email    string `json:"email,omitempty"`
 	Fullname string `json:"fullname,omitempty"`
-
 	Nickname string `json:"nickname,omitempty"`
 }
 
@@ -21,6 +18,9 @@ type Users []*User
 
 func (u *User) Create() (users *Users, err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("create user")
+
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
 	}
@@ -57,13 +57,17 @@ func (u *User) Create() (users *Users, err ModelError) {
 			}
 		}
 	}
-	defer tx.Rollback()
+
 	tx.Commit()
 	return users, err
 }
 
+//optimize
 func (u *User) GetProfile() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("Getting profile")
+
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
 	}
@@ -74,17 +78,19 @@ func (u *User) GetProfile() (err ModelError) {
 		u.Nickname).Scan(&u.About, &u.Email, &u.Fullname, &u.Nickname)
 
 	if er != nil {
-		// log.Println(er)
+		log.Println("cannot get profile", er)
 		err = ModelError{Message: NotFound}
 	}
 
-	defer tx.Rollback()
 	tx.Commit()
 	return err
 }
 
 func (u *User) UpdateProfile() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("update user")
+
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
 	}
@@ -120,13 +126,16 @@ func (u *User) UpdateProfile() (err ModelError) {
 		err = ModelError{Message: NotFound}
 	}
 
-	defer tx.Rollback()
 	tx.Commit()
 	return err
 }
 
+//optimize
 func (useres *Users) GetByForum(forum *Forum, limit int64, since string, desc bool) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("get user by forum")
+
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
 	}
@@ -188,7 +197,7 @@ func (useres *Users) GetByForum(forum *Forum, limit int64, since string, desc bo
 		}
 	}
 
-	defer tx.Rollback()
+	row.Close()
 	tx.Commit()
 	return err
 }

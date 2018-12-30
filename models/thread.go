@@ -11,21 +11,14 @@ import (
 
 //easyjson:json
 type Thread struct {
-	Author string `json:"author"`
-
+	Author  string    `json:"author"`
 	Created time.Time `json:"created"`
-
-	Forum string `json:"forum"`
-
-	Id int64 `json:"id"`
-
-	Message string `json:"message"`
-
-	Slug string `json:"slug,omitempty"`
-
-	Title string `json:"title"`
-
-	Votes int64 `json:"votes,omitempty"`
+	Forum   string    `json:"forum"`
+	Id      int64     `json:"id"`
+	Message string    `json:"message"`
+	Slug    string    `json:"slug,omitempty"`
+	Title   string    `json:"title"`
+	Votes   int64     `json:"votes,omitempty"`
 }
 
 //easyjson:json
@@ -33,6 +26,9 @@ type Threads []*Thread
 
 func (t *Thread) Create() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("create thread")
+
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
 	}
@@ -47,6 +43,7 @@ func (t *Thread) Create() (err ModelError) {
 		log.Println(os.Stderr, err)
 		err = ModelError{Message: NotFound}
 	} else {
+		t.Created.Truncate(time.Microsecond)
 		er = tx.QueryRow(`
 			INSERT INTO "thread" (slug, created, title, message, u_id, f_id)
 			VALUES (NULLIF($1, ''),	$2,	$3,	$4, $5, $6)
@@ -77,15 +74,19 @@ func (t *Thread) Create() (err ModelError) {
 				Scan(&t.Author, &t.Created, &t.Forum, &t.Id, &t.Message, &t.Slug, &t.Title, &t.Votes)
 		}
 	}
-	defer tx.Rollback()
 
 	tx.Commit()
 
 	return err
 }
 
+//optimize
 func (t *Thread) Get() (err ModelError) {
+	log.Println("getting Thread")
+
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", er)
 	}
@@ -108,8 +109,8 @@ func (t *Thread) Get() (err ModelError) {
 		"forum"."slug" as forum,
 		thread.id as id,
 		thread.message as message,
-		thread.slug as slug,
-		thread.title as title,
+		coalesce(thread.slug, '') as slug,
+		coalesce(thread.title, '') as title,
 		COALESCE(sum(CASE 
 						WHEN vote.voice THEN
 							1 
@@ -125,12 +126,11 @@ func (t *Thread) Get() (err ModelError) {
 
 	er = tx.QueryRow(query, value).
 		Scan(&t.Author, &t.Created, &t.Forum, &t.Id, &t.Message, &t.Slug, &t.Title, &t.Votes)
+
 	if er != nil {
 		err = ModelError{Message: NotFound}
-		log.Println(er)
+		log.Println("cannot get thread info", er)
 	}
-
-	defer tx.Rollback()
 
 	tx.Commit()
 
@@ -139,6 +139,9 @@ func (t *Thread) Get() (err ModelError) {
 
 func (t *Thread) Update() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("update thread")
+
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", er)
 	}
@@ -195,17 +198,18 @@ func (t *Thread) Update() (err ModelError) {
 		}
 	}
 
-	defer tx.Rollback()
-
 	tx.Commit()
 
 	return err
 }
 
+//optimize
 func (threads *Threads) GetThreadsByForum(forumSlug string, limit int64, since string,
 	desc bool) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
+	log.Println("get thread by forum")
+
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
 	}
@@ -252,8 +256,8 @@ func (threads *Threads) GetThreadsByForum(forumSlug string, limit int64, since s
 							forum.slug as forum,
 							thread.id as id,
 							thread.message as message,
-							thread.slug as slug,
-							thread.title as title,
+							coalesce(thread.slug, '') as slug,
+							coalesce(thread.title, '') as title,
 							COALESCE(sum(CASE WHEN vote.voice = true THEN 1
 									WHEN vote.voice = false THEN -1
 									ELSE 0

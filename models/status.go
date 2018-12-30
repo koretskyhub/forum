@@ -8,17 +8,17 @@ import (
 
 //easyjson:json
 type Status struct {
-	Forum int64 `json:"forum"`
-
-	Post int64 `json:"post"`
-
+	Forum  int64 `json:"forum"`
+	Post   int64 `json:"post"`
 	Thread int64 `json:"thread"`
-
-	User int64 `json:"user"`
+	User   int64 `json:"user"`
 }
 
 func (s *Status) ResetData() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("reset data")
+
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
 	}
@@ -27,12 +27,12 @@ func (s *Status) ResetData() (err ModelError) {
 	delete from "post";
 	delete from "thread";
 	delete from "forum";
-	delete from "user";`)
+	delete from "user";
+	`)
+
 	if er != nil {
 		log.Println(er)
 	}
-
-	defer tx.Rollback()
 
 	tx.Commit()
 
@@ -43,18 +43,24 @@ func (s *Status) ResetData() (err ModelError) {
 
 func (s *Status) GetStatus() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
+	defer tx.Rollback()
+	log.Println("get status")
+
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
 	}
-	er = tx.QueryRow(`
-	select 
-		(select count(*) from forum) as forum,
-		(select count(*) from post) as post,
-		(select count(*) from thread) as thread,
-		(select count(*) from "user") as user;`).Scan(&s.Forum, &s.Post, &s.Thread, &s.User)
+	er = tx.QueryRow(`	
+						select 
+						(select count(*) from forum) as forum,
+						(select count(*) from post) as post,
+						(select count(*) from thread) as thread,
+						(select count(*) from "user") as user;
+					`).
+		Scan(&s.Forum, &s.Post, &s.Thread, &s.User)
 	if er != nil {
 		log.Println(er)
 	}
 
+	tx.Commit()
 	return err
 }
