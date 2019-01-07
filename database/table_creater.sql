@@ -84,10 +84,4 @@ CREATE TRIGGER forum_threads_num
   FOR EACH ROW
 EXECUTE PROCEDURE forum_inc_threads();
 
-CREATE INDEX idx_user_by_forum_user ON public."user" 		USING btree (nickname);
-CREATE INDEX idx_forum_stat_user ON public."user" 			USING btree (id, nickname);
-CREATE INDEX idx_forum_stat_thread ON public.thread 		USING btree (id, f_id);
-CREATE INDEX idx_user_by_forum_thread ON public.thread 	USING btree (f_id, id);
-CREATE INDEX idx_user_by_forum_thread2 ON public.thread USING btree (f_id, u_id);
-CREATE INDEX idx_forum_stat_post ON public.post 				USING btree (t_id, id);
-CREATE INDEX idx_forum_stat_forum ON public.forum 			USING btree (slug, id, u_id, title);
+CREATE INDEX if not exists idx_forum_stat_post ON public.post 	USING btree (t_id);
