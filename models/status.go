@@ -17,7 +17,7 @@ type Status struct {
 func (s *Status) ResetData() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("reset data")
+	// log.Println("reset data")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
@@ -26,6 +26,7 @@ func (s *Status) ResetData() (err ModelError) {
 	delete from "vote";
 	delete from "post";
 	delete from "thread";
+	delete from "forum_users";
 	delete from "forum";
 	delete from "user";
 	`)
@@ -44,7 +45,7 @@ func (s *Status) ResetData() (err ModelError) {
 func (s *Status) GetStatus() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("get status")
+	// log.Println("get status")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)

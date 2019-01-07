@@ -19,7 +19,6 @@ type Users []*User
 func (u *User) Create() (users *Users, err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("create user")
 
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
@@ -32,7 +31,7 @@ func (u *User) Create() (users *Users, err ModelError) {
 		OR nickname = $2;`,
 		u.Email,
 		u.Nickname); er != nil {
-		// log.Println(er)
+			log.Println(er)
 	} else {
 		if foundUser := rows.Next(); foundUser == true {
 			users = &Users{}
@@ -62,11 +61,11 @@ func (u *User) Create() (users *Users, err ModelError) {
 	return users, err
 }
 
-//optimize
+//optimized v1
 func (u *User) GetProfile() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("Getting profile")
+	// log.Println("Getting profile")
 
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
@@ -78,7 +77,7 @@ func (u *User) GetProfile() (err ModelError) {
 		u.Nickname).Scan(&u.About, &u.Email, &u.Fullname, &u.Nickname)
 
 	if er != nil {
-		log.Println("cannot get profile", er)
+		// log.Println("cannot get profile", er)
 		err = ModelError{Message: NotFound}
 	}
 
@@ -89,7 +88,7 @@ func (u *User) GetProfile() (err ModelError) {
 func (u *User) UpdateProfile() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("update user")
+	// log.Println("update user")
 
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
@@ -134,7 +133,7 @@ func (u *User) UpdateProfile() (err ModelError) {
 func (useres *Users) GetByForum(forum *Forum, limit int64, since string, desc bool) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("get user by forum")
+	// log.Println("get user by forum")
 
 	if er != nil {
 		log.Println("Unable to create transaction:", er)
@@ -172,20 +171,70 @@ func (useres *Users) GetByForum(forum *Forum, limit int64, since string, desc bo
 		}
 	}
 
+	// row, er := tx.Query(`
+	// 	select
+	// 		"user"."about" as about,
+	// 		"user"."email" as email,
+	// 		"user"."fullname" as fullname,
+	// 		"user"."nickname" as nickname
+	// 	from thread
+	// 	left join post on "post"."t_id" = thread.id
+	// 	join "user" on ("user"."id" = post.u_id or "user"."id" = thread.u_id)
+	// 	where thread.f_id = $1
+	// 	and `+sinceQuery+`
+	// 	group by "user"."about", "user"."email", "user"."fullname", "user"."nickname"
+	// 	order by "user"."nickname" `+descQuery+`
+	// 	limit $3;`, fid, since, limit)
+
+	// row, er := tx.Query(`
+	// select distinct on ("user"."nickname")
+	// 	"user"."about" as about,
+	// 	"user"."email" as email,
+	// 	"user"."fullname" as fullname,
+	// 	"user"."nickname" as nickname
+	// from "user"
+	// join "thread" on "thread"."f_id" = $1
+	// left join "post" on "post"."t_id" = "thread"."id"
+	// where `+sinceQuery+`
+	// and ("user"."id" = "post"."u_id" or "user"."id" = "thread"."u_id")
+	// order by "user"."nickname"`+descQuery+`
+	// limit $3;`, fid, since, limit)
+	// row, er := tx.Query(`
+	// select 
+	// 	"user"."about" as about,
+	// 	"user"."email" as email,
+	// 	"user"."fullname" as fullname,
+	// 	"user"."nickname" as nickname
+	// from "user" where "user"."id" in 
+	// (
+	// 	select 
+	// 		"post"."u_id"
+	// 	from "thread"
+	// 	join "post" on "post"."t_id" = "thread"."id"
+	// 	where "thread"."f_id" = $1
+	// 	union
+	// 	select
+	// 		"u_id"
+	// 	from "thread"
+	// 	where "thread"."f_id" = $1
+	// )
+	// and `+ sinceQuery +`
+	// order by "user"."nickname"`+ descQuery +`
+	// limit $3;`, fid, since, limit)
+
 	row, er := tx.Query(`
-		select 
-			"user"."about" as about,
-			"user"."email" as email,
-			"user"."fullname" as fullname,
-			"user"."nickname" as nickname
-		from thread
-		left join post on "post"."t_id" = thread.id 
-		join "user" on ("user"."id" = post.u_id or "user"."id" = thread.u_id)
-		where thread.f_id = $1
-		and `+sinceQuery+`
-		group by "user"."about", "user"."email", "user"."fullname", "user"."nickname"
-		order by "user"."nickname" `+descQuery+`
-		limit $3;`, fid, since, limit)
+	select 
+		"user"."about" as about,
+		"user"."email" as email,
+		"user"."fullname" as fullname,
+		"user"."nickname" as nickname
+	from "user" 
+	join "forum_users" on"user"."nickname" = "forum_users"."u_nickname"
+	where "forum_users"."f_slug" = $1
+	and `+ sinceQuery +`
+	order by "user"."nickname"`+ descQuery +`
+	limit $3;`, forum.Slug, since, limit)
+	
 
 	if er != nil {
 		// log.Println(er)

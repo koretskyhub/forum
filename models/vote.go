@@ -16,7 +16,7 @@ type Vote struct {
 func (vote *Vote) AddVoice(t *Thread) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("add voice")
+	// log.Println("add voice")
 	
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", er)

@@ -34,7 +34,6 @@ type Posts []*Post
 func (posts *Posts) Create(t *Thread) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("create post")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
@@ -95,9 +94,30 @@ func (posts *Posts) Create(t *Thread) (err ModelError) {
 			`, p.Message, p.Created, p.Parent, authorId, p.Thread).Scan(&p.Id)
 
 			if er != nil {
+				log.Println(er)
 				err = ModelError{Message: Conflict}
 			}
 		}
+	}
+
+	_, er = tx.Exec(`
+	UPDATE forum
+	SET posts = posts + $1
+	WHERE forum.slug = $2;`, len(*posts), t.Forum)
+
+	if er != nil {
+		log.Println(er);
+	} 
+
+	for _, p := range *posts {
+		_, er = tx.Exec(`
+		INSERT INTO "forum_users" (u_nickname, f_slug)
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING;`, p.Author, t.Forum)
+
+		if er != nil {
+			log.Println(er);
+		} 
 	}
 
 	tx.Commit()
@@ -109,7 +129,7 @@ func (posts *Posts) Create(t *Thread) (err ModelError) {
 func (posts *Posts) GetPostsByThread(t *Thread, sort string, limit int64, since string, desc bool) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("get post by thread")
+	// log.Println("get post by thread")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", er)
@@ -380,7 +400,7 @@ func (posts *Posts) GetPostsByThread(t *Thread, sort string, limit int64, since 
 func (postF *PostFull) Details(related *[]string) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("GET postFull Details")
+	// log.Println("GET postFull Details")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", er)
@@ -436,7 +456,7 @@ func (postF *PostFull) Details(related *[]string) (err ModelError) {
 func (post *Post) Update() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("update post")
+	// log.Println("update post")
 
 	if er != nil {
 		log.Println("Unable to create transaction:", er)

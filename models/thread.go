@@ -27,7 +27,7 @@ type Threads []*Thread
 func (t *Thread) Create() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("create thread")
+	// log.Println("create thread")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
@@ -43,6 +43,7 @@ func (t *Thread) Create() (err ModelError) {
 		log.Println(os.Stderr, err)
 		err = ModelError{Message: NotFound}
 	} else {
+
 		t.Created.Truncate(time.Microsecond)
 		er = tx.QueryRow(`
 			INSERT INTO "thread" (slug, created, title, message, u_id, f_id)
@@ -72,6 +73,15 @@ func (t *Thread) Create() (err ModelError) {
 			where thread.slug = $1
 			group by thread.id, "user"."id", "forum"."id";`, t.Slug).
 				Scan(&t.Author, &t.Created, &t.Forum, &t.Id, &t.Message, &t.Slug, &t.Title, &t.Votes)
+		} else {
+			_, er = tx.Exec(`
+			INSERT INTO "forum_users" (u_nickname, f_slug)
+			VALUES ($1, $2)
+			ON CONFLICT DO NOTHING;`, t.Author, t.Forum)
+	
+			if er != nil {
+				log.Println(er);
+			} 
 		}
 	}
 
@@ -82,7 +92,7 @@ func (t *Thread) Create() (err ModelError) {
 
 //optimize
 func (t *Thread) Get() (err ModelError) {
-	log.Println("getting Thread")
+	// log.Println("getting Thread")
 
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
@@ -129,7 +139,7 @@ func (t *Thread) Get() (err ModelError) {
 
 	if er != nil {
 		err = ModelError{Message: NotFound}
-		log.Println("cannot get thread info", er)
+		// log.Println("cannot get thread info", er)
 	}
 
 	tx.Commit()
@@ -140,7 +150,7 @@ func (t *Thread) Get() (err ModelError) {
 func (t *Thread) Update() (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("update thread")
+	// log.Println("update thread")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", er)
@@ -208,7 +218,7 @@ func (threads *Threads) GetThreadsByForum(forumSlug string, limit int64, since s
 	desc bool) (err ModelError) {
 	tx, er := database.DBConnPool.Begin()
 	defer tx.Rollback()
-	log.Println("get thread by forum")
+	// log.Println("get thread by forum")
 
 	if er != nil {
 		log.Println(os.Stderr, "Unable to create transaction:", err)
